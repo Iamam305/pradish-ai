@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "set NODE_OPTIONS='--max-old-space-size=8192' && next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
@@ -14,16 +14,26 @@
     "@nextui-org/react": "^2.2.9",
     "@nextui-org/system": "^2.0.15",
     "@nextui-org/theme": "^2.1.17",
+    "@pinecone-database/doc-splitter": "^0.0.1",
+    "@pinecone-database/pinecone": "^1.1.2",
+    "@supabase/supabase-js": "^2.39.0",
+    "ai": "^2.2.27",
     "axios": "^1.6.2",
     "framer-motion": "^10.16.10",
+    "langchain": "^0.0.199",
+    "md5": "^2.3.0",
     "mongoose": "^8.0.2",
     "next": "14.0.3",
+    "openai-edge": "^1.2.2",
+    "pdf-parse": "^1.1.1",
     "react": "^18",
     "react-dom": "^18",
     "react-dropzone": "^14.2.3",
-    "react-hot-toast": "^2.4.1"
+    "react-hot-toast": "^2.4.1",
+    "react-query": "^3.39.3"
   },
   "devDependencies": {
+    "@types/md5": "^2.3.5",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",

@@ -1,6 +1,7 @@
 "use client";
 import { Progress, Spinner } from "@nextui-org/react";
 import axios from "axios";
+import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 import { useDropzone } from "react-dropzone";
 import Dropzone from "react-dropzone";
@@ -9,39 +10,53 @@ import toast from "react-hot-toast/headless";
 const Page = () => {
   const [uploading, setUploading] = useState(false);
   const [creatingVector, setCreatingVector] = useState(false);
-
+  const router = useRouter();
   const uploadFileToS3 = async (acceptedFile: File) => {
-    console.log(acceptedFile, acceptedFile.size);
-
-    if (acceptedFile.size > 10 * 1024 * 1024) {
-      // bigger than 10mb!
-      toast.error("File too large");
-    }
-
     try {
+      console.log(acceptedFile, acceptedFile.size);
+  
+      if (acceptedFile.size > 10 * 1024 * 1024) {
+        // bigger than 10mb!
+        toast.error("File too large");
+        return;
+      }
+  
       setUploading(true);
+  
       const fileFormData = new FormData();
       fileFormData.append("file", acceptedFile);
+  
       console.log(fileFormData.get("file"));
+  
       const uploadFile = await axios.post("/api/upload", fileFormData);
-      if (uploadFile.status == 200 || 201) {
+  
+      if (uploadFile.status === 200 || uploadFile.status === 201) {
         console.log(uploadFile.data);
         setUploading(false);
         setCreatingVector(true);
-        setTimeout(() => {
-          setCreatingVector(false);
-        }, 10000);
+  
+        const convertToVectors = await axios.post("/api/convert-to-vector", {
+          fileId: uploadFile.data.savedFile._id,
+        });
+  
+        console.log(convertToVectors);
+  
+        if (convertToVectors.status === 200) {
+          router.push("/", { scroll: false });
+        }
       } else {
-        setUploading(false);
-        setCreatingVector(false);
-        toast.error(uploadFile.data.error || "something went wrong");
+        throw new Error(uploadFile.data.error || "Something went wrong");
       }
+      
     } catch (error) {
-      console.log(error);
-
-      toast.error("something went wrong");
+      console.error(error);
+      toast.error("Something went wrong");
+    } finally {
+      setUploading(false);
+      setCreatingVector(false);
     }
   };
+  
   return (
     <div className="flex items-center justify-center w-full max-w-xl mx-auto mt-16">
       {!uploading && !creatingVector ? (

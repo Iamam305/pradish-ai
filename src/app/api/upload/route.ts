@@ -41,6 +41,8 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ savedFile, success: true }, { status: 200 });
   } catch (error) {
+    console.log(error);
+
     return NextResponse.json(
       { error: "something went wrong" },
       { status: 500 }

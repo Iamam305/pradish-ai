@@ -15,6 +15,10 @@ const upload_file_schema = new mongoose.Schema({
   userId: {
     type: String,
   },
+  fileLocation: {
+    type: String,
+    default: "no file location",
+  },
 });
 
 export const UploadFile =

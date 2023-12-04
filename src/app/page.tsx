@@ -1,7 +1,26 @@
-import { Button, Input } from "@nextui-org/react";
-import Image from "next/image";
+"use client";
+import {
+  Button,
+  Card,
+  CardBody,
+  CardFooter,
+  CardHeader,
+  Divider,
+  Input,
+  Skeleton,
+  Image,
+  Code,
+} from "@nextui-org/react";
+import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
+import { useQuery } from "react-query";
 
 export default function Home() {
+  const { isLoading, error, data } = useQuery("repoData", () =>
+    fetch("/api/projects").then((res) => res.json())
+  );
+  console.log(data);
+  const pathname = usePathname();
   return (
     <>
       <div className="max-w-[1024px] mx-auto flex w-full gap-8 justify-center items-center mt-24">
@@ -71,6 +90,71 @@ export default function Home() {
           Add New
         </Button>
       </div>
+      {isLoading && (
+        <>
+          <div className="max-w-[1024px] mx-auto flex justify-left items-stretch flex-wrap gap-4 mt-10">
+            <Skeleton isLoaded={!isLoading} className="rounded-lg">
+              <div className="max-w-[300px] h-24 rounded-lg bg-secondary"></div>
+            </Skeleton>
+
+            <Skeleton isLoaded={!isLoading} className="rounded-lg">
+              <div className="max-w-[300px] h-24 rounded-lg bg-secondary"></div>
+            </Skeleton>
+
+            <Skeleton isLoaded={!isLoading} className="rounded-lg">
+              <div className="max-w-[300px] h-24 rounded-lg bg-secondary"></div>
+            </Skeleton>
+          </div>
+        </>
+      )}
+
+      {data && (
+        <div className="max-w-[1024px] mx-auto flex justify-left items-stretch flex-wrap gap-4 mt-10">
+          {data?.projects.map((project: any) => (
+            <Card className="max-w-[300px]">
+              <CardHeader className="flex gap-3">
+                <div className="flex flex-col">
+                  <p className="text-md">{project.fileName}</p>
+                  <p className="text-small text-default-500">12/12/12</p>
+                </div>
+              </CardHeader>
+              <Divider />
+              <CardBody>
+                <pre className=" text-gray-600 dark:text-gray-300 whitespace-pre-wrap bg-black p-4 rounded-md">
+                  {`<iframe>${window.location.href}chat/${project._id}</iframe>`}
+                </pre>
+              </CardBody>
+              <Divider />
+              <CardFooter>
+                <p className="text-small text-default-500">
+                  {project.fileType}
+                </p>
+              </CardFooter>
+            </Card>
+          ))}
+        </div>
+      )}
     </>
   );
 }
+// fileKey
+// :
+// "uploads/1701520793107(2)-Final Good Habits - Website Content 28th October 2023.pdf"
+// fileLocation
+// :
+// "no file location"
+// fileName
+// :
+// "(2) Final Good Habits - Website Content 28th October 2023.pdf"
+// fileType
+// :
+// "application/pdf"
+// userId
+// :
+// "user_2YwBvslcps3Yj1sMbSYsftqE0t0"
+// __v
+// :
+// 0
+// _id
+// :
+// "656b25991e283789a3b0fe60"
