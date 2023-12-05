@@ -13,7 +13,7 @@ function useChatScroll<T>(dep: T): React.MutableRefObject<HTMLDivElement> {
   return ref;
 }
 const Page = () => {
- const [chatId, setChatId] = useState(uuid())
+  const [chatId, setChatId] = useState(uuid());
   console.log(chatId);
 
   const chatContainerRef = useRef<HTMLUListElement>();
