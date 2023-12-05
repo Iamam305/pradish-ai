@@ -15,6 +15,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useQuery } from "react-query";
 import Fuse from "fuse.js";
+import Link from "next/link";
 
 export default function Home() {
   const { isLoading, error, data } = useQuery("repoData", () =>
@@ -112,7 +113,7 @@ export default function Home() {
       {data && (
         <div className="max-w-[1024px] mx-auto flex justify-left items-stretch flex-wrap gap-4 mt-10">
           {data?.projects.map((project: any) => (
-            <Card className="max-w-[330px]">
+            <Card className="max-w-[330px]" key={project._id}>
               <CardHeader className="flex justify-between">
                 <div className="flex flex-col">
                   <p className="text-md">{project.fileName}</p>
@@ -126,10 +127,13 @@ export default function Home() {
                 </pre>
               </CardBody>
               <Divider />
-              <CardFooter>
+              <CardFooter className="justify-between">
                 <p className="text-small text-default-500">
                   {project.fileType}
                 </p>
+                <Button color="primary">
+                  <Link href={`/chat/${project._id}`}>Demo</Link>
+                </Button>
               </CardFooter>
             </Card>
           ))}

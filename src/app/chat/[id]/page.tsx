@@ -47,7 +47,7 @@ const Page = () => {
     <main className="flex flex-col items-center justify-between ">
       {/* <button onClick={createIndexAndEmbeddings}>Create index and embeddings</button> */}
       <div className="container mx-auto">
-        <div className="max-w-2xl border rounded">
+        <div className="max-w-2xl border rounded mx-auto">
           <div>
             <div className="w-full">
               <div className="relative flex items-center p-3 border-b border-gray-300">
@@ -89,7 +89,7 @@ const Page = () => {
                   ))}
                   {isLoading ? (
                     <li className="flex justify-start">
-                      <div className="relative max-w-xl px-4 py-2 text-gray-700 rounded shadow text-xs">
+                      <div className="relative max-w-xl px-4 py-2 text-gray-700 rounded shadow text-xs dark:text-gray-300">
                         typing...
                       </div>
                     </li>
