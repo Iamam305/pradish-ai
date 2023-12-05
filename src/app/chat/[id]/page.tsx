@@ -1,5 +1,8 @@
 "use client";
+import { useChat } from "ai/react";
+import { useParams } from "next/navigation";
 import React, { useRef, useState } from "react";
+
 function useChatScroll<T>(dep: T): React.MutableRefObject<HTMLDivElement> {
   const ref = React.useRef() as React.MutableRefObject<HTMLInputElement>;
   React.useEffect(() => {
@@ -10,34 +13,36 @@ function useChatScroll<T>(dep: T): React.MutableRefObject<HTMLDivElement> {
   return ref;
 }
 const Page = () => {
-  const [query, setQuery] = useState("");
-  const [result, setResult] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [chats, setChats] = useState<any>([]);
   const chatContainerRef = useRef<HTMLUListElement>();
-  const ref = useChatScroll(chats);
+  const params = useParams();
+  const { messages, input, handleInputChange, handleSubmit, isLoading } =
+    useChat({
+      api: `/api/chat`,
+      body: { fileId: params.id },
+    });
+  const ref = useChatScroll(messages);
 
-  async function sendQuery(e: any) {
-    e.preventDefault();
-    if (!query) return;
+  // async function sendQuery(e: any) {
+  //   e.preventDefault();
+  //   if (!query) return;
 
-    try {
-      setChats((value: any) => [...value, { type: "user", content: query }]);
-      setLoading(true);
-      const result = await fetch("/api/chat", {
-        method: "POST",
-        body: JSON.stringify(query),
-      });
-      setQuery("");
-      const json = await result.json();
-      // setResult(json.data);
-      setLoading(false);
-      setChats((value: any) => [...value, { type: "bot", content: json.data }]);
-    } catch (err) {
-      console.log("err:", err);
-      setLoading(false);
-    }
-  }
+  //   try {
+  //     setChats((value: any) => [...value, { type: "user", content: query }]);
+  //     setLoading(true);
+  //     const result = await fetch("/api/chat", {
+  //       method: "POST",
+  //       body: JSON.stringify(query),
+  //     });
+  //     setQuery("");
+  //     const json = await result.json();
+  //     // setResult(json.data);
+  //     setLoading(false);
+  //     setChats((value: any) => [...value, { type: "bot", content: json.data }]);
+  //   } catch (err) {
+  //     console.log("err:", err);
+  //     setLoading(false);
+  //   }
+  // }
   return (
     <main className="flex flex-col items-center justify-between ">
       {/* <button onClick={createIndexAndEmbeddings}>Create index and embeddings</button> */}
@@ -58,22 +63,22 @@ const Page = () => {
                 className="relative w-full p-3 overflow-y-auto h-[20rem]"
                 ref={ref}
               >
-                <ul className="space-y-2">
-                  {chats?.map((chat: any, i: any) => (
+                <ul className="space-y-4">
+                  {messages?.map((message: any, i: any) => (
                     <div key={i}>
-                      {chat.type == "bot" ? (
+                      {message.role !== "user" ? (
                         <>
                           <li className="flex justify-start">
-                            <div className="relative max-w-xl px-4 py-2 text-gray-700 rounded shadow">
-                              <span className="block">{chat.content}</span>
+                            <div className="relative max-w-xl px-4 py-2 text-gray-700 bg-black rounded shadow dark:text-gray-300 dark:bg-gray-700">
+                              <span className="block">{message.content}</span>
                             </div>
                           </li>
                         </>
-                      ) : chat.type == "user" ? (
+                      ) : message.role == "user" ? (
                         <>
                           <li className="flex justify-end">
-                            <div className="relative max-w-xl px-4 py-2 text-gray-700 bg-gray-100 rounded shadow">
-                              <span className="block">{chat.content}</span>
+                            <div className="relative max-w-xl px-4 py-2 text-gray-700 bg-whte rounded shadow dark:bg-gray-900 dark:text-gray-300">
+                              <span className="block">{message.content}</span>
                             </div>
                           </li>
                         </>
@@ -82,7 +87,7 @@ const Page = () => {
                       )}
                     </div>
                   ))}
-                  {loading ? (
+                  {isLoading ? (
                     <li className="flex justify-start">
                       <div className="relative max-w-xl px-4 py-2 text-gray-700 rounded shadow text-xs">
                         typing...
@@ -94,7 +99,7 @@ const Page = () => {
                 </ul>
               </div>
               <form
-                onSubmit={sendQuery}
+                onSubmit={handleSubmit}
                 className="flex items-center justify-between w-full p-3 border-t border-gray-300"
               >
                 <input
@@ -103,12 +108,12 @@ const Page = () => {
                   className="block w-full py-2 pl-4 mx-3 bg-gray-100 rounded-full outline-none focus:text-gray-700"
                   name="message"
                   required
-                  onChange={(e) => setQuery(e.target.value)}
-                  disabled={loading}
-                  value={query}
+                  value={input}
+                  onChange={handleInputChange}
+                  disabled={isLoading}
                 />
 
-                <button type="submit" disabled={loading}>
+                <button type="submit" disabled={isLoading}>
                   <svg
                     className="w-5 h-5 text-gray-500 origin-center transform rotate-90"
                     xmlns="http://www.w3.org/2000/svg"

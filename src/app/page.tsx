@@ -14,6 +14,7 @@ import {
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useQuery } from "react-query";
+import Fuse from "fuse.js";
 
 export default function Home() {
   const { isLoading, error, data } = useQuery("repoData", () =>
@@ -93,15 +94,15 @@ export default function Home() {
       {isLoading && (
         <>
           <div className="max-w-[1024px] mx-auto flex justify-left items-stretch flex-wrap gap-4 mt-10">
-            <Skeleton isLoaded={!isLoading} className="rounded-lg">
+            <Skeleton isLoaded={isLoading} className="rounded-lg">
               <div className="max-w-[300px] h-24 rounded-lg bg-secondary"></div>
             </Skeleton>
 
-            <Skeleton isLoaded={!isLoading} className="rounded-lg">
+            <Skeleton isLoaded={isLoading} className="rounded-lg">
               <div className="max-w-[300px] h-24 rounded-lg bg-secondary"></div>
             </Skeleton>
 
-            <Skeleton isLoaded={!isLoading} className="rounded-lg">
+            <Skeleton isLoaded={isLoading} className="rounded-lg">
               <div className="max-w-[300px] h-24 rounded-lg bg-secondary"></div>
             </Skeleton>
           </div>
@@ -111,8 +112,8 @@ export default function Home() {
       {data && (
         <div className="max-w-[1024px] mx-auto flex justify-left items-stretch flex-wrap gap-4 mt-10">
           {data?.projects.map((project: any) => (
-            <Card className="max-w-[300px]">
-              <CardHeader className="flex gap-3">
+            <Card className="max-w-[330px]">
+              <CardHeader className="flex justify-between">
                 <div className="flex flex-col">
                   <p className="text-md">{project.fileName}</p>
                   <p className="text-small text-default-500">12/12/12</p>

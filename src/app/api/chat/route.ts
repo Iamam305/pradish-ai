@@ -16,24 +16,36 @@ import {
   RunnablePassthrough,
   RunnableSequence,
 } from "langchain/schema/runnable";
-import { combineDocuments } from "@/lib/helper/utils";
+import { combineDocuments, formatMessage } from "@/lib/helper/utils";
 import { Chat } from "@/models/chat-model";
-
+import {
+  Message,
+  OpenAIStream,
+  StreamingTextResponse,
+  LangChainStream,
+} from "ai";
+import mongoose from "mongoose";
 // Connect to the database
+
+// export const runtime = "edge";
 connectDB();
 
 export async function POST(req: NextRequest) {
   try {
     // Extract required data from the request body
-    const { query, fileId, chat } = await req.json();
-
+    const { query, fileId, chat, messages } = await req.json();
+    const formattedPreviousMessages = messages.slice(0, -1).map(formatMessage);
+    const currentMessageContent = messages[messages.length - 1].content;
     // Find the uploaded file by ID
-    const uploadedFile = await UploadFile.findById(fileId);
+    const uploadedFile = await UploadFile.findById(
+      new mongoose.Types.ObjectId(fileId)
+    );
 
     // If the file is not found, return a 404 response
     if (!uploadedFile) {
       return NextResponse.json({ error: "not found" }, { status: 404 });
     } else {
+      const { handlers, writer } = LangChainStream();
       // Initialize OpenAIEmbeddings and Supabase client
       const embeddings = new OpenAIEmbeddings({
         openAIApiKey: envConf.openAiKey,
@@ -55,11 +67,17 @@ export async function POST(req: NextRequest) {
       const retriever = vectorStore.asRetriever(1, funcFilterFile);
 
       // Initialize ChatOpenAI instance
-      const llm = new ChatOpenAI({ openAIApiKey: envConf.openAiKey });
+      const llm = new ChatOpenAI({
+        openAIApiKey: envConf.openAiKey,
+        streaming: true,
+        temperature: 0,
+      });
 
       // Define a template for standalone questions
-      const standaloneQuestionTemplate =
-        "Given a question, convert it to a standalone question. question: {question} standalone question:";
+      const standaloneQuestionTemplate = `Given some conversation history (if any) and a question, convert the question to a standalone question. 
+        conversation history: {chat_history}
+        question: {question} 
+        standalone question:`;
 
       // Create a prompt using the template
       const standaloneQuestionPrompt = PromptTemplate.fromTemplate(
@@ -82,6 +100,8 @@ export async function POST(req: NextRequest) {
       If the context does not provide the answer to question, the AI assistant will say, "I'm sorry, but I don't know the answer to that question".
       AI assistant will not apologize for previous responses, but instead will indicated new information was gained.
       AI assistant will not invent anything that is not drawn directly from the context.
+      AI assistant will not tell users about itself.
+
       context: {context}
       question: {question}
       answer:`;
@@ -111,12 +131,20 @@ export async function POST(req: NextRequest) {
       ]);
 
       // Invoke the chain with the provided question
-      const response = await chain.invoke({
-        question: query,
-      });
+      // const response = await chain.invoke({
+      //   question: query,
+      // });
 
+      const stream = await chain.stream(
+        {
+          chat_history: formattedPreviousMessages.join("\n"),
+          question: currentMessageContent,
+        },
+        {}
+      );
+      return new StreamingTextResponse(stream);
       // Return the response as JSON with a 200 status
-      return NextResponse.json({ response }, { status: 200 });
+      // return NextResponse.json({ response }, { status: 200 });
     }
   } catch (error) {
     // Handle any errors and return a 500 status response
@@ -127,4 +155,3 @@ export async function POST(req: NextRequest) {
     );
   }
 }
-
