@@ -1,8 +1,8 @@
 "use client";
 import { useChat } from "ai/react";
 import { useParams } from "next/navigation";
-import React, { useRef, useState } from "react";
-
+import React, { useEffect, useId, useRef, useState } from "react";
+import { v4 as uuid } from "uuid";
 function useChatScroll<T>(dep: T): React.MutableRefObject<HTMLDivElement> {
   const ref = React.useRef() as React.MutableRefObject<HTMLInputElement>;
   React.useEffect(() => {
@@ -13,12 +13,15 @@ function useChatScroll<T>(dep: T): React.MutableRefObject<HTMLDivElement> {
   return ref;
 }
 const Page = () => {
+ const [chatId, setChatId] = useState(uuid())
+  console.log(chatId);
+
   const chatContainerRef = useRef<HTMLUListElement>();
   const params = useParams();
   const { messages, input, handleInputChange, handleSubmit, isLoading } =
     useChat({
       api: `/api/chat`,
-      body: { fileId: params.id },
+      body: { fileId: params.id, chatId },
     });
   const ref = useChatScroll(messages);
 

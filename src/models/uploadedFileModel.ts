@@ -21,6 +21,4 @@ const upload_file_schema = new mongoose.Schema({
   },
 });
 
-export const UploadFile =
-  mongoose.models.UploadFile ||
-  mongoose.model("UploadFile", upload_file_schema);
+export const UploadFile = mongoose.models.UploadFile ||mongoose.model("UploadFile", upload_file_schema);

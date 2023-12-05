@@ -27,13 +27,13 @@ import {
 import mongoose from "mongoose";
 // Connect to the database
 
-// export const runtime = "edge";
+// export const runtime = 'edge';
 connectDB();
 
 export async function POST(req: NextRequest) {
   try {
     // Extract required data from the request body
-    const { query, fileId, chat, messages } = await req.json();
+    const { fileId, messages, chatId } = await req.json();
     const formattedPreviousMessages = messages.slice(0, -1).map(formatMessage);
     const currentMessageContent = messages[messages.length - 1].content;
     // Find the uploaded file by ID
@@ -45,7 +45,7 @@ export async function POST(req: NextRequest) {
     if (!uploadedFile) {
       return NextResponse.json({ error: "not found" }, { status: 404 });
     } else {
-      const { handlers, writer } = LangChainStream();
+      const { stream, handlers, writer } = LangChainStream();
       // Initialize OpenAIEmbeddings and Supabase client
       const embeddings = new OpenAIEmbeddings({
         openAIApiKey: envConf.openAiKey,
@@ -128,20 +128,22 @@ export async function POST(req: NextRequest) {
           question: ({ original_input }) => original_input.question,
         },
         answerChain,
-      ]);
+        // handlers
+      ], );
 
       // Invoke the chain with the provided question
       // const response = await chain.invoke({
-      //   question: query,
+      //   question: currentMessageContent,
+      //   chat_history: formattedPreviousMessages.join("\n"),
       // });
 
-      const stream = await chain.stream(
-        {
-          chat_history: formattedPreviousMessages.join("\n"),
-          question: currentMessageContent,
-        },
-        {}
-      );
+      // const stream = await chain.stream(
+      //   {
+      //     chat_history: formattedPreviousMessages.join("\n"),
+      //     question: currentMessageContent,
+      //   },
+      //   {}
+      // );
       return new StreamingTextResponse(stream);
       // Return the response as JSON with a 200 status
       // return NextResponse.json({ response }, { status: 200 });

@@ -8,8 +8,7 @@ const messageSchema = new Schema({
     required: true,
   },
   chatId: {
-    type: Schema.Types.ObjectId,
-    ref: "Chat",
+    type: String,
     required: true,
   },
   content: {
