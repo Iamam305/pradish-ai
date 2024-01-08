@@ -1,5 +1,5 @@
-import { NextResponse } from "next/server"
+import { NextRequest, NextResponse } from "next/server"
 
-export const GET = async()=>{
-    NextResponse.json("suii")
+export const GET = async(req:NextRequest)=>{
+    NextResponse.json("suii",req)
 }
