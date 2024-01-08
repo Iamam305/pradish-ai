@@ -25,12 +25,17 @@ import {
   LangChainStream,
 } from "ai";
 import mongoose from "mongoose";
+import { SingleMessage } from "@/models/messages-model";
+import { Configuration, OpenAIApi } from "openai-edge";
+
 // Connect to the database
 
 // export const runtime = 'edge';
 connectDB();
 
 export async function POST(req: NextRequest) {
+  const forwarded = req.headers.get("x-forwarded-for");
+  const ip = forwarded ? forwarded.split(/, /)[0] : req.ip;
   try {
     // Extract required data from the request body
     const { fileId, messages, chatId } = await req.json();
@@ -137,10 +142,20 @@ export async function POST(req: NextRequest) {
       //   chat_history: formattedPreviousMessages.join("\n"),
       // });
 
-      const stream = await chain.stream({
-        chat_history: formattedPreviousMessages.join("\n"),
-        question: currentMessageContent,
-      });
+      const stream = await chain.stream(
+        {
+          chat_history: formattedPreviousMessages.join("\n"),
+          question: currentMessageContent,
+        },
+
+      );
+      // await new SingleMessage({
+      //   fileId,
+      //   chatId,
+      //   role: "user",
+      //   content: currentMessageContent,
+      //   ip,
+      // }).save();
 
       return new StreamingTextResponse(stream);
       // Return the response as JSON with a 200 status

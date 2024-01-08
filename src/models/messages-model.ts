@@ -25,7 +25,10 @@ const messageSchema = new Schema({
     enum: ["user", "system"],
     required: true,
   },
+  ip:{
+    type: String,
+  }
 });
 
-export const Message =
-  mongoose.models.Message || mongoose.model("Message", messageSchema);
+export const SingleMessage =
+  mongoose.models.SingleMessage || mongoose.model("SingleMessage", messageSchema);

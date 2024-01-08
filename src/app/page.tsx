@@ -23,6 +23,10 @@ export default function Home() {
   );
   console.log(data);
   const pathname = usePathname();
+
+  const fuse = new Fuse(data?.projects, {
+    keys: ["fileName", "author.firstName"],
+  });
   return (
     <>
       <div className="max-w-[1024px] mx-auto flex w-full gap-8 justify-center items-center mt-24">
@@ -71,7 +75,9 @@ export default function Home() {
         />
         <Button
           color="primary"
-          size="lg"
+          size="md"
+          as={Link}
+          href={"/upload-docs"}
           startContent={
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -79,7 +85,7 @@ export default function Home() {
               viewBox="0 0 24 24"
               strokeWidth={1.5}
               stroke="currentColor"
-              className="w-6 h-6"
+              className="w-full h-full"
             >
               <path
                 strokeLinecap="round"
@@ -89,6 +95,7 @@ export default function Home() {
             </svg>
           }
         >
+          {" "}
           Add New
         </Button>
       </div>
