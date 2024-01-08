@@ -1,5 +1,7 @@
-import { NextRequest, NextResponse } from "next/server"
+import { NextRequest, NextResponse } from "next/server";
 
-export const GET = async(req:NextRequest)=>{
-   return NextResponse.json("suii",req)
-}
+export const GET = async (req: NextRequest) => {
+  
+    
+  return NextResponse.json("sui");
+};
